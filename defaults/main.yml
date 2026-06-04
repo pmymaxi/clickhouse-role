@@ -1,0 +1,15 @@
+---
+clickhouse_version: "22.3.3.44"
+clickhouse_repo_baseurl: "https://packages.clickhouse.com/rpm/stable/"
+clickhouse_repo_gpgcheck: false
+clickhouse_repo_enabled: true
+
+clickhouse_config_dest: "/etc/clickhouse-server/config.d/listen_host.xml"
+
+clickhouse_nativ_port: 9000
+clickhouse_nativ_host: "127.0.0.1"
+clickhouse_nativ_delay: 2
+clickhouse_nativ_timeout: 30
+
+clickhouse_db_name: "nginx"
+clickhouse_table_name: "my_access_logs"

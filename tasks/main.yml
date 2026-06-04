@@ -1,0 +1,59 @@
+---
+- name: Install yum-utils
+  ansible.builtin.dnf:
+    name:
+      - yum-utils
+- name: Get clickhouse repo
+  tags:
+    - clickaddrepo
+  ansible.builtin.yum_repository:
+    name: clickhouse
+    description: ClickHouse Repository
+    baseurl: "{{ clickhouse_repo_baseurl }}"
+    gpgcheck: "{{ clickhouse_repo_gpgcheck }}"
+    enabled: "{{ clickhouse_repo_enabled }}"
+- name: Install clickhouse packages
+  tags:
+    - clickinstall
+  ansible.builtin.dnf:
+    name:
+      - clickhouse-client-{{ clickhouse_version }}
+      - clickhouse-server-{{ clickhouse_version }}
+  notify: Start clickhouse service
+- name: Past templates clickhouse
+  tags:
+    - clicksetconf
+  ansible.builtin.template:
+    src: "{{ clickhouse_template_src }}"
+    dest: "{{ clickhouse_config_dest }}"
+    mode: "{{ clickhouse_template_mode }}"
+  notify: Start clickhouse service
+- name: Flush handlers
+  ansible.builtin.meta: flush_handlers
+- name: Wait access port clickhouse
+  ansible.builtin.wait_for:
+    port: "{{ clickhouse_nativ_port }}"
+    host: "{{ clickhouse_nativ_host }}"
+    delay: "{{ clickhouse_nativ_delay }}"
+    timeout: "{{ clickhouse_nativ_timeout }}"
+- name: Create database
+  tags:
+    - clickcreatedb
+  ansible.builtin.command: clickhouse-client -q "CREATE DATABASE IF NOT EXISTS {{ clickhouse_db_name }};"
+  register: clickhouse_create_db
+  failed_when: clickhouse_create_db.rc != 0 and clickhouse_create_db.rc != 82
+  changed_when: clickhouse_create_db.rc == 0
+- name: Create table
+  tags:
+    - clickcreatetable
+  ansible.builtin.command:
+    clickhouse-client -q "
+    CREATE TABLE IF NOT EXISTS {{ clickhouse_db_name }}.{{ clickhouse_table_name }} (
+    message String
+    )
+    ENGINE = MergeTree()
+    ORDER BY tuple()
+    "
+  register: clickhouse_create_table
+  failed_when: clickhouse_create_table.rc != 0
+  changed_when: clickhouse_create_db.rc == 0

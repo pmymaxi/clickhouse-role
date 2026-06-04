@@ -1,0 +1,6 @@
+---
+- hosts: clickhouse
+  remote_user: dops
+  become: true
+  roles:
+    - clickhouse
