@@ -1,0 +1,8 @@
+---
+clickhouse_template_src: "templates/listen_host.xml.j2"
+clickhouse_template_mode: "0644"
+
+clickhouse_packages:
+  - clickhouse-client
+  - clickhouse-server
+  - clickhouse-common-static
