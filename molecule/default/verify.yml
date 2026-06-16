@@ -1,0 +1,134 @@
+---
+# Purpose: assert that the instance really ended up in the expected state.
+# Molecule calls this playbook with `molecule verify`.
+- name: Verify
+  hosts: all
+  gather_facts: true # Quicker, if you do not need facts
+  vars:
+    debug_enabled: false
+  tasks:
+    - name: Verify clickhouse binary exists
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - /usr/bin/clickhouse
+        - "{{ clickhouse_config_dest }}"
+      register: clickhouse_bin
+      when: "'clickhouse' in group_names"
+
+    - name: Check structure databases clickhouse
+      ansible.builtin.command: >
+        clickhouse-client -q "
+        SHOW CREATE TABLE {{ clickhouse_db_name }}.{{ clickhouse_table_name }};
+        "
+      register: clickhouse_check_db
+      when: "'clickhouse' in group_names"
+    
+    - name: Access port clickhouse native
+      ansible.builtin.wait_for:
+        port: "{{ clickhouse_nativ_port }}"
+        host: "{{ clickhouse_nativ_host }}"
+        delay: "{{ clickhouse_nativ_delay }}"
+        timeout: "{{ clickhouse_nativ_timeout }}"
+      register: access_port_clickhouse
+      when: "'clickhouse' in group_names"
+
+    - name: Validate vector config
+      ansible.builtin.shell: >
+        vector validate "{{ vector_conf_dest }}"
+      register: validate_vector_config
+      when: "'vector' in group_names"
+
+    - name: Check status vector
+      ansible.builtin.shell: pidof -c vector
+      register: vector_status_pid
+      when: "'vector' in group_names"
+
+    - name: Vector access port to clickhouse
+      ansible.builtin.wait_for:
+        port: "{{ vector_clickhouse_http_port }}"
+        host: "{{ vector_clickhouse_http_host }}"
+        delay: "{{ vector_clickhouse_http_delay }}"
+        timeout: "{{ vector_clickhouse_http_timeout }}"
+      register: vector_access_port_to_clickhouse
+      when: "'vector' in group_names"
+
+    - name: Validate nginx website and lighthouse
+      ansible.builtin.shell: nginx -t
+      register: nginx_validate_config
+      when: "'nginx' in group_names"
+
+    - name: Check status nginx website and lighthouse
+      ansible.builtin.shell: pidof -c nginx
+      register: nginx_status_pid
+      when: "'nginx' in group_names"
+
+    - name: Verify nginx website and lighthouse file log exists
+      ansible.builtin.stat:
+        path: /var/log/nginx/my_access.log
+      when: "'nginx' in group_names"
+      register: log_file
+
+    - name: Verify nginx lighthouse file lndex.html exists in root 
+      ansible.builtin.stat:
+        path: "{{ lighthouse_git_dest }}/index.html"
+      when: "'lighthouse' in group_names"
+      register: lighthouse_file_index
+
+    - name: Verify nginx website file lndex.html exists in root 
+      ansible.builtin.stat:
+        path: "{{ website_web_dest }}"
+      when: "'website' in group_names"
+      register: website_file_index
+
+    - name: Debug verify
+      ansible.builtin.debug:
+        msg:
+          - "{{ clickhouse_bin }}"
+          - "{{ clickhouse_check_db }}"
+          - "{{ access_port_clickhouse }}"
+          - "{{ validate_vector_config }}"
+          - "{{ vector_status_pid }}"
+          - "{{ vector_access_port_to_clickhouse }}"
+          - "{{ nginx_validate_config }}"
+          - "{{ nginx_status_pid }}"
+          - "{{ log_file }}"
+          - "{{ lighthouse_file_index }}"
+          - "{{ website_file_index }}"
+      when: debug_enabled
+
+    - name: Assert clickhouse bin, db, port
+      ansible.builtin.assert:
+        that:
+          - clickhouse_bin.results[0].stat.exists
+          - clickhouse_check_db.rc == 0
+          - access_port_clickhouse.state == 'started'
+      when: "'clickhouse' in group_names"
+    
+    - name: Assert vector config, pid, access port
+      ansible.builtin.assert:
+        that:
+          - validate_vector_config.rc == 0
+          - vector_status_pid.rc == 0
+          - vector_access_port_to_clickhouse.state == 'started'
+      when: "'vector' in group_names"
+    
+    - name: Assert nginx config, pid, logfile exists
+      ansible.builtin.assert:
+        that:
+          - nginx_validate_config.rc == 0
+          - nginx_status_pid.rc == 0
+          - log_file.stat.exists
+      when: "'nginx' in group_names"
+
+    - name: Assert lighthouse index exists
+      ansible.builtin.assert:
+        that:
+          - lighthouse_file_index.stat.size > 0
+      when: "'lighthouse' in group_names"
+
+    - name: Assert website index exists
+      ansible.builtin.assert:
+        that:
+          - website_file_index.stat.size > 0
+      when: "'website' in group_names"

@@ -1,0 +1,4 @@
+---
+lighthouse_git_repo: "https://github.com/VKCOM/lighthouse.git"
+lighthouse_git_dest: "/usr/share/nginx/lighthouse"
+lighthouse_git_version: "master"

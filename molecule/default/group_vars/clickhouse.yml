@@ -4,9 +4,6 @@ clickhouse_repo_baseurl: "https://packages.clickhouse.com/rpm/stable/"
 clickhouse_repo_gpgcheck: false
 clickhouse_repo_enabled: true
 
-clickhouse_use_install: false
-clickhouse_start_systemd: false
-
 clickhouse_config_dest: "/etc/clickhouse-server/config.d/listen_host.xml"
 
 clickhouse_nativ_port: 9000

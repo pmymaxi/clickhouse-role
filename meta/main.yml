@@ -2,6 +2,8 @@ galaxy_info:
   author: Max Maxi
   description: This role is set by clickhouse
   company: dops
+  role_name: vector
+  namespace: dops
 
   # If the issue tracker for your role is not on github, uncomment the
   # next line and provide a value

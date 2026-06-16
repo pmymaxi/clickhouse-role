@@ -1,0 +1,7 @@
+---
+firewall_access_port:
+  - 80/tcp
+
+nginx_create_root_dir: "/usr/share/nginx/hw04"
+nginx_root_dir: "{{ nginx_create_root_dir }}"
+website_web_dest: "{{ nginx_create_root_dir }}/index.html"

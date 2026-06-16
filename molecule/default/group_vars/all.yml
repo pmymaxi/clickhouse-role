@@ -1,0 +1,5 @@
+---
+clickhouse_http_port: "8123"
+set_timezone: "Europe/Moscow"
+clickhouse_use_install: false
+clickhouse_start_systemd: false

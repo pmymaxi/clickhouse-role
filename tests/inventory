@@ -1,8 +1,8 @@
 [clickhouse]
-clickhouse-01 ansible_host=192.168.1.207
+clickhouse-01 ansible_host=127.0.0.1
 
 [clickhouse:vars]
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
-ansible_user=dops
+ansible_user=user
 ansible_port=22
-ansible_ssh_private_key_file=/home/dops/.ssh/id_ed25519
+ansible_ssh_private_key_file=path_ss_key_pub

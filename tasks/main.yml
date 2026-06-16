@@ -1,25 +1,29 @@
 ---
-- name: Install yum-utils
-  ansible.builtin.dnf:
-    name:
-      - yum-utils
-- name: Get clickhouse repo
-  tags:
-    - clickaddrepo
-  ansible.builtin.yum_repository:
-    name: clickhouse
-    description: ClickHouse Repository
-    baseurl: "{{ clickhouse_repo_baseurl }}"
-    gpgcheck: "{{ clickhouse_repo_gpgcheck }}"
-    enabled: "{{ clickhouse_repo_enabled }}"
-- name: Install clickhouse packages
-  tags:
-    - clickinstall
-  ansible.builtin.dnf:
-    name:
-      - clickhouse-client-{{ clickhouse_version }}
-      - clickhouse-server-{{ clickhouse_version }}
+- name: Install clickhouse
+  when: clickhouse_use_install
   notify: Start clickhouse service
+  block:
+    - name: Install yum-utils
+      ansible.builtin.dnf:
+        name:
+          - yum-utils
+    - name: Get clickhouse repo
+      tags:
+        - clickaddrepo
+      ansible.builtin.yum_repository:
+        name: clickhouse
+        description: ClickHouse Repository
+        baseurl: "{{ clickhouse_repo_baseurl }}"
+        gpgcheck: "{{ clickhouse_repo_gpgcheck }}"
+        enabled: "{{ clickhouse_repo_enabled }}"
+    - name: Install clickhouse packages
+      tags:
+        - clickinstall
+      ansible.builtin.dnf:
+        name:
+          - clickhouse-client-{{ clickhouse_version }}
+          - clickhouse-server-{{ clickhouse_version }}
+
 - name: Past templates clickhouse
   tags:
     - clicksetconf
@@ -28,32 +32,57 @@
     dest: "{{ clickhouse_config_dest }}"
     mode: "{{ clickhouse_template_mode }}"
   notify: Start clickhouse service
+
 - name: Flush handlers
   ansible.builtin.meta: flush_handlers
+
 - name: Wait access port clickhouse
   ansible.builtin.wait_for:
     port: "{{ clickhouse_nativ_port }}"
     host: "{{ clickhouse_nativ_host }}"
     delay: "{{ clickhouse_nativ_delay }}"
     timeout: "{{ clickhouse_nativ_timeout }}"
+
+- name: Check database exists
+  ansible.builtin.command: >
+    clickhouse-client -q "SELECT count() FROM system.databases WHERE name = '{{ clickhouse_db_name }}'"
+  register: clickhouse_db_exists
+  changed_when: false
+
+- name: Check database table exists
+  ansible.builtin.command: >
+    clickhouse-client -q "
+    SELECT count()
+    FROM system.tables
+    WHERE database = '{{ clickhouse_db_name }}'
+      AND name = '{{ clickhouse_table_name }}'
+    "
+  register: clickhouse_db_table_exists
+  changed_when: false
+
 - name: Create database
   tags:
     - clickcreatedb
   ansible.builtin.command: clickhouse-client -q "CREATE DATABASE IF NOT EXISTS {{ clickhouse_db_name }};"
   register: clickhouse_create_db
+  when: clickhouse_db_exists.stdout | int == 0
   failed_when: clickhouse_create_db.rc != 0 and clickhouse_create_db.rc != 82
   changed_when: clickhouse_create_db.rc == 0
+
 - name: Create table
   tags:
     - clickcreatetable
   ansible.builtin.command:
     clickhouse-client -q "
-    CREATE TABLE IF NOT EXISTS {{ clickhouse_db_name }}.{{ clickhouse_table_name }} (
+    CREATE TABLE IF NOT EXISTS {{ clickhouse_db_name }}.{{ clickhouse_table_name }}
+    (
+    timestamp DateTime,
     message String
     )
     ENGINE = MergeTree()
-    ORDER BY tuple()
+    ORDER BY timestamp;
     "
   register: clickhouse_create_table
+  when: clickhouse_db_table_exists.stdout | int == 0
   failed_when: clickhouse_create_table.rc != 0
-  changed_when: clickhouse_create_db.rc == 0
+  changed_when: clickhouse_create_table.rc == 0

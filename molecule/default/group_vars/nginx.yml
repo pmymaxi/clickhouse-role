@@ -1,0 +1,6 @@
+---
+nginx_user: "nginx"
+nginx_groups: "nginx"
+nginx_create_root_dir: ""
+nginx_root_dir: "/usr/share/nginx/html"
+nginx_conf_dest: "/etc/nginx/nginx.conf"

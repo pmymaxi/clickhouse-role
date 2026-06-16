@@ -1,0 +1,4 @@
+---
+website_web_dest: "/usr/share/nginx/html/index.html"
+website_clickhouse_server: "http://{{ hostvars['clickhouse-01'].ansible_facts['default_ipv4']['address'] }}:{{ clickhouse_http_port }}"
+website_use_systemd: false

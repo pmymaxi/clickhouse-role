@@ -1,0 +1,40 @@
+---
+# Purpose: bring the instance to the desired state by running the role under test.
+# Molecule calls this playbook with `molecule converge`.
+- name: Converge
+  hosts: all
+  gather_facts: true  # Disable if your role does not rely on facts
+  tasks:
+    - name: Show service manager
+      ansible.builtin.debug:
+        var: ansible_facts['service_mgr']
+
+    - name: Apply role clickhouse
+      ansible.builtin.include_role:
+        name: clickhouse
+      when: "'clickhouse' in group_names"
+
+    - name: Apply role nginx
+      ansible.builtin.include_role:
+        name: nginx
+      when: "'nginx' in group_names"
+
+    - name: Apply role vector
+      ansible.builtin.include_role:
+        name: vector
+      when: "'vector' in group_names"
+
+    - name: Apply role website
+      ansible.builtin.include_role:
+        name: website
+      when: "'website' in group_names"
+
+    - name: Apply role lighthouse
+      ansible.builtin.include_role:
+        name: lighthouse
+      when: "'lighthouse' in group_names"
+
+    - name: Apply role firewall
+      ansible.builtin.include_role:
+        name: firewall
+      when: "'firewall' in group_names"

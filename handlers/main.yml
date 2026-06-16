@@ -1,6 +1,15 @@
 ---
-- name: Start clickhouse service
+- name: Start clickhouse service systemd
   ansible.builtin.service:
     name: clickhouse-server
     enabled: true
     state: restarted
+  when: clickhouse_start_systemd
+  listen: Start clickhouse service
+
+- name: Reload clickhouse configure service
+  ansible.builtin.command: >
+    clickhouse-client --query "SYSTEM RELOAD CONFIG"
+  when: not clickhouse_start_systemd
+  listen: Start clickhouse service
+  changed_when: false

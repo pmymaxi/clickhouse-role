@@ -1,0 +1,22 @@
+---
+roles:
+  - src: https://github.com/pmymaxi/nginx-role
+    scm: git
+    version: "v1.0.0"
+    name: nginx
+  - src: https://github.com/pmymaxi/website-role
+    scm: git
+    version: "v1.0.0"
+    name: website
+  - src: https://github.com/pmymaxi/vector-role
+    scm: git
+    version: "v1.0.0"
+    name: vector
+  - src: https://github.com/pmymaxi/lighthouse-role
+    scm: git
+    version: "v1.0.0"
+    name: lighthouse
+  - src: https://github.com/pmymaxi/firewall-role
+    scm: git
+    version: "v1.0.0"
+    name: firewall
