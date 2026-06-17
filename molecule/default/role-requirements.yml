@@ -2,15 +2,15 @@
 roles:
   - src: https://github.com/pmymaxi/nginx-role
     scm: git
-    version: "v1.0.0"
+    version: "v1.0.1"
     name: nginx
   - src: https://github.com/pmymaxi/website-role
     scm: git
-    version: "v1.0.0"
+    version: "v1.1.0"
     name: website
   - src: https://github.com/pmymaxi/vector-role
     scm: git
-    version: "v1.0.0"
+    version: "v1.2.3"
     name: vector
   - src: https://github.com/pmymaxi/lighthouse-role
     scm: git

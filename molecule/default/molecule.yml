@@ -66,9 +66,7 @@ ansible:
     ssh_connection:
       pipelining: true
   env:
-    ANSIBLE_ROLES_PATH: >
-      ${MOLECULE_PROJECT_DIRECTORY}/../../role:
-      ${HOME}/.ansible/roles:
+    ANSIBLE_ROLES_PATH: "${MOLECULE_PROJECT_DIRECTORY}/../:${HOME}/.ansible/roles"
     ANSIBLE_FORCE_COLOR: "1"
     ANSIBLE_LOAD_CALLBACK_PLUGINS: "1"
 

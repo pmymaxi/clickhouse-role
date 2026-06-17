@@ -22,8 +22,7 @@ Role Variables
 |  `clickhouse_config_dest`   | path до файла конфигурации на instance                                  |                 |
 |  `clickhouse_nativ_port`    | TCP порт службы                                                         | `9000`          |
 |  `clickhouse_nativ_host`    | IP eth службы                                                           | `127.0.0.1`     |
-|  `clickhouse_nativ_delay`   | Время ожидания перед первой проверкой                                   | `2`             |
-|                             | запуска TCP сокета на хосте                                             |                 |
+|  `clickhouse_nativ_delay`   | Время ожидания перед первой проверкой запуска TCP сокета на хосте       | `2`             |
 |  `clickhouse_nativ_timeout` | Максимальное время ожидания                                             | `30`            |
 |  `clickhouse_db_name`       | Имя создаваемой базы данных                                             | `nginx`         |
 |  `clickhouse_table_name`    | Имя создаваемой таблицы в БД                                            | `my_access_logs`|
@@ -33,9 +32,9 @@ Role Variables
 
 Molecule
 -----------
-Molecule выполняет тестирование полного deploy stack с использованием Docker.
+Molecule выполняет deploy тестирование full stack (ClickHouse - Vector+Nginx - Lighthouse) с использованием Docker container.
 
-Выполняет следующие сценария:
+Выполняются следующие сценария:
 scenario:
   name: log_stack
   test_sequence:
@@ -103,7 +102,7 @@ env:
   CLICKHOUSE_USER: admin
   CLICKHOUSE_PASSWORD: admin
 ```
-Он передается в переменное окружение при создании docker container и для начального определения авторизационных данных в clickhouse-server.
+Переменные передаются в переменное окружение docker container , а также для начального определения авторизационных данных в clickhouse-server.
 
 Example Playbook
 ----------------
