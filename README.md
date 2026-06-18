@@ -104,6 +104,25 @@ env:
 ```
 Переменные передаются в переменное окружение docker container , а также для начального определения авторизационных данных в clickhouse-server.
 
+Molecule тестирование
+-----------
+1. Скачиваем clickhouse-role
+```bash
+ansible-galaxy role install git+https://github.com/pmymaxi/clickhouse-role.git,v1.1.2
+```
+2. В директории role-path переименуем название роли с clickhouse-role на clickhouse. Необходимо для того, чтобы название роли совпадало с названием в play converge.yml. Если скачивать role с использованием структурного файла requirements.yml, тогда выполнять действия с переименованием директории роли не нужно.
+```bash
+ansible-galaxy role install git+https://github.com/pmymaxi/clickhouse-role.git,v1.1.2
+```
+<img width="928" height="122" alt="clickhouse-1" src="https://github.com/user-attachments/assets/977c21b2-6243-4eee-9ed2-74e17942879a" />
+
+3. Выполняем запуск сценария molecule
+```bash
+molecule test
+```
+<img width="1357" height="1981" alt="clickhouse-2" src="https://github.com/user-attachments/assets/fd94837b-b3ff-4aa4-b2c4-7fd1241afe08" />
+
+
 Example Playbook
 ----------------
 
